@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { 
@@ -12,11 +12,25 @@ import {
   Calendar,
   ExternalLink,
   Trash2,
-  RefreshCw
+  RefreshCw,
+  Activity
 } from "lucide-react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { toast } from "sonner";
+import { 
+  LineChart, 
+  Line, 
+  AreaChart,
+  Area,
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  BarChart,
+  Bar
+} from "recharts";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
