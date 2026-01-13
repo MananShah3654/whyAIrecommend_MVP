@@ -182,6 +182,14 @@ async def root():
 async def create_audit(request: AuditRequest):
     """Run an AI recommendation audit for a product"""
     
+    # Validate required fields
+    if not request.product_name or not request.product_name.strip():
+        raise HTTPException(status_code=422, detail="Product name is required")
+    if not request.website_url or not request.website_url.strip():
+        raise HTTPException(status_code=422, detail="Website URL is required")
+    if not request.category or not request.category.strip():
+        raise HTTPException(status_code=422, detail="Category is required")
+    
     # Run the AI audit
     result = await run_ai_audit(request)
     
