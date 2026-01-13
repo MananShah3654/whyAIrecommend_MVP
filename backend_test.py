@@ -25,6 +25,8 @@ class WhyAIRecommendTester:
                 response = requests.get(url, headers=headers, timeout=timeout)
             elif method == 'POST':
                 response = requests.post(url, json=data, headers=headers, timeout=timeout)
+            elif method == 'DELETE':
+                response = requests.delete(url, headers=headers, timeout=timeout)
 
             print(f"   Status: {response.status_code}")
             
