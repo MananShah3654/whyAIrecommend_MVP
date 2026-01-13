@@ -135,6 +135,7 @@ export default function DashboardPage() {
       const improvementRate = total > 0 ? Math.round((recommended / total) * 100) : 0;
       
       setStats({ total, recommended, notRecommended, improvementRate });
+      processChartData(auditData);
     } catch (error) {
       console.error("Failed to fetch audits:", error);
       toast.error("Failed to load audit history");
