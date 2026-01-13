@@ -257,10 +257,18 @@ export default function DashboardPage() {
                             <Clock className="w-3 h-3" />
                             {getTimeAgo(audit.created_at)}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <ExternalLink className="w-3 h-3" />
-                            {new URL(audit.website_url).hostname}
-                          </span>
+                          {audit.website_url && (
+                            <span className="flex items-center gap-1">
+                              <ExternalLink className="w-3 h-3" />
+                              {(() => {
+                                try {
+                                  return new URL(audit.website_url).hostname;
+                                } catch {
+                                  return audit.website_url;
+                                }
+                              })()}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
