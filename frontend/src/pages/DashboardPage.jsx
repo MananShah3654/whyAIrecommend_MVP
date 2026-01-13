@@ -277,6 +277,202 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
+        {/* Trend Charts */}
+        {audits.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="grid md:grid-cols-2 gap-6 mb-12"
+          >
+            {/* Audit Activity Chart */}
+            <div 
+              data-testid="audit-activity-chart"
+              className="p-6 rounded-2xl border border-border bg-card"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                  <Activity className="w-5 h-5 text-accent" />
+                </div>
+                <div>
+                  <h3 className="font-heading font-semibold">Audit Activity</h3>
+                  <p className="text-sm text-muted-foreground">Last 14 days</p>
+                </div>
+              </div>
+              <div className="h-[200px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData}>
+                    <defs>
+                      <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#CCFF00" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#CCFF00" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
+                    <XAxis 
+                      dataKey="displayDate" 
+                      stroke="#737373" 
+                      fontSize={11}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis 
+                      stroke="#737373" 
+                      fontSize={11}
+                      tickLine={false}
+                      axisLine={false}
+                      allowDecimals={false}
+                    />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: '#0a0a0a', 
+                        border: '1px solid #262626',
+                        borderRadius: '8px',
+                        fontSize: '12px'
+                      }}
+                      labelStyle={{ color: '#ededed' }}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="total" 
+                      stroke="#CCFF00" 
+                      strokeWidth={2}
+                      fillOpacity={1} 
+                      fill="url(#colorTotal)" 
+                      name="Total Audits"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Recommendation Trend Chart */}
+            <div 
+              data-testid="recommendation-trend-chart"
+              className="p-6 rounded-2xl border border-border bg-card"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-accent" />
+                </div>
+                <div>
+                  <h3 className="font-heading font-semibold">Recommendation Trend</h3>
+                  <p className="text-sm text-muted-foreground">Last 14 days</p>
+                </div>
+              </div>
+              <div className="h-[200px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
+                    <XAxis 
+                      dataKey="displayDate" 
+                      stroke="#737373" 
+                      fontSize={11}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis 
+                      stroke="#737373" 
+                      fontSize={11}
+                      tickLine={false}
+                      axisLine={false}
+                      allowDecimals={false}
+                    />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: '#0a0a0a', 
+                        border: '1px solid #262626',
+                        borderRadius: '8px',
+                        fontSize: '12px'
+                      }}
+                      labelStyle={{ color: '#ededed' }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="recommended" 
+                      stroke="#22c55e" 
+                      strokeWidth={2}
+                      dot={{ fill: '#22c55e', strokeWidth: 0, r: 3 }}
+                      name="Recommended"
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="notRecommended" 
+                      stroke="#ef4444" 
+                      strokeWidth={2}
+                      dot={{ fill: '#ef4444', strokeWidth: 0, r: 3 }}
+                      name="Not Recommended"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Weekly Comparison */}
+            <div 
+              data-testid="weekly-comparison-chart"
+              className="p-6 rounded-2xl border border-border bg-card md:col-span-2"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                    <BarChart3 className="w-5 h-5 text-accent" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading font-semibold">Weekly Comparison</h3>
+                    <p className="text-sm text-muted-foreground">This week vs last week</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-green-500" />
+                    <span className="text-muted-foreground">Recommended</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500" />
+                    <span className="text-muted-foreground">Not Recommended</span>
+                  </div>
+                </div>
+              </div>
+              <div className="h-[160px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={weeklyData} layout="vertical" barCategoryGap="20%">
+                    <CartesianGrid strokeDasharray="3 3" stroke="#262626" horizontal={false} />
+                    <XAxis 
+                      type="number" 
+                      stroke="#737373" 
+                      fontSize={11}
+                      tickLine={false}
+                      axisLine={false}
+                      allowDecimals={false}
+                    />
+                    <YAxis 
+                      type="category" 
+                      dataKey="name" 
+                      stroke="#737373" 
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                      width={80}
+                    />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: '#0a0a0a', 
+                        border: '1px solid #262626',
+                        borderRadius: '8px',
+                        fontSize: '12px'
+                      }}
+                      labelStyle={{ color: '#ededed' }}
+                    />
+                    <Bar dataKey="recommended" fill="#22c55e" radius={[0, 4, 4, 0]} name="Recommended" />
+                    <Bar dataKey="notRecommended" fill="#ef4444" radius={[0, 4, 4, 0]} name="Not Recommended" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {/* Audit List */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
