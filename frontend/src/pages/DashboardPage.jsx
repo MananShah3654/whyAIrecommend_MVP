@@ -45,10 +45,82 @@ export default function DashboardPage() {
     notRecommended: 0,
     improvementRate: 0
   });
+  const [chartData, setChartData] = useState([]);
+  const [weeklyData, setWeeklyData] = useState([]);
 
   useEffect(() => {
     fetchAudits();
   }, []);
+
+  const processChartData = (auditData) => {
+    // Group audits by date for trend chart
+    const dateMap = {};
+    const now = new Date();
+    
+    // Initialize last 14 days
+    for (let i = 13; i >= 0; i--) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
+      const dateKey = date.toISOString().split('T')[0];
+      dateMap[dateKey] = { date: dateKey, total: 0, recommended: 0, notRecommended: 0 };
+    }
+    
+    // Fill with actual data
+    auditData.forEach(audit => {
+      const dateKey = new Date(audit.created_at).toISOString().split('T')[0];
+      if (dateMap[dateKey]) {
+        dateMap[dateKey].total += 1;
+        if (audit.is_recommended) {
+          dateMap[dateKey].recommended += 1;
+        } else {
+          dateMap[dateKey].notRecommended += 1;
+        }
+      }
+    });
+    
+    // Convert to array and format dates
+    const chartArray = Object.values(dateMap).map(item => ({
+      ...item,
+      displayDate: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    }));
+    
+    setChartData(chartArray);
+    
+    // Calculate weekly comparison data
+    const thisWeek = auditData.filter(a => {
+      const auditDate = new Date(a.created_at);
+      const weekAgo = new Date(now);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      return auditDate >= weekAgo;
+    });
+    
+    const lastWeek = auditData.filter(a => {
+      const auditDate = new Date(a.created_at);
+      const weekAgo = new Date(now);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const twoWeeksAgo = new Date(now);
+      twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+      return auditDate >= twoWeeksAgo && auditDate < weekAgo;
+    });
+    
+    const thisWeekRecommended = thisWeek.filter(a => a.is_recommended).length;
+    const lastWeekRecommended = lastWeek.filter(a => a.is_recommended).length;
+    
+    setWeeklyData([
+      { 
+        name: 'Last Week', 
+        recommended: lastWeekRecommended, 
+        notRecommended: lastWeek.length - lastWeekRecommended,
+        total: lastWeek.length
+      },
+      { 
+        name: 'This Week', 
+        recommended: thisWeekRecommended, 
+        notRecommended: thisWeek.length - thisWeekRecommended,
+        total: thisWeek.length
+      }
+    ]);
+  };
 
   const fetchAudits = async () => {
     try {
