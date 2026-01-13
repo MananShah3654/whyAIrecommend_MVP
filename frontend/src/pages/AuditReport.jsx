@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
-import { ArrowLeft, Check, X, RotateCcw, Users, FileText, ArrowRight, Sparkles } from "lucide-react";
+import { ArrowLeft, Check, X, RotateCcw, FileText, ArrowRight, Sparkles, Twitter, Download, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import axios from "axios";
+import html2pdf from "html2pdf.js";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -14,6 +16,8 @@ export default function AuditReport() {
   const navigate = useNavigate();
   const [audit, setAudit] = useState(location.state?.auditResult || null);
   const [loading, setLoading] = useState(!audit);
+  const [exporting, setExporting] = useState(false);
+  const reportRef = useRef(null);
 
   useEffect(() => {
     if (!audit && auditId) {
@@ -31,6 +35,50 @@ export default function AuditReport() {
       fetchAudit();
     }
   }, [auditId, audit, navigate]);
+
+  const handleExportPDF = async () => {
+    if (!reportRef.current) return;
+    
+    setExporting(true);
+    toast.info("Generating PDF...");
+    
+    try {
+      const element = reportRef.current;
+      const opt = {
+        margin: [0.5, 0.5, 0.5, 0.5],
+        filename: `${audit.product_name}-ai-audit-report.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#0a0a0a'
+        },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+      
+      await html2pdf().set(opt).from(element).save();
+      toast.success("PDF exported successfully!");
+    } catch (error) {
+      console.error("PDF export failed:", error);
+      toast.error("Failed to export PDF. Please try again.");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleShareTwitter = () => {
+    const status = audit.is_recommended 
+      ? `Just discovered that AI tools ARE recommending ${audit.product_name}! 🎉`
+      : `Just ran an AI recommendation audit for ${audit.product_name} — interesting insights on why AI tools might be missing us.`;
+    
+    const hashtags = "AImarketing,SaaS,ProductGrowth";
+    const url = window.location.href;
+    
+    const tweetText = `${status}\n\nRun your own free audit:`;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(url)}&hashtags=${hashtags}`;
+    
+    window.open(twitterUrl, '_blank', 'width=550,height=420');
+  };
 
   if (loading) {
     return (
@@ -57,18 +105,35 @@ export default function AuditReport() {
           </button>
           <div className="flex items-center gap-3">
             <Button
-              data-testid="upgrade-nav-btn"
-              onClick={() => navigate("/pricing")}
+              data-testid="share-twitter-btn"
+              onClick={handleShareTwitter}
+              variant="outline"
               size="sm"
-              className="rounded-full bg-accent text-accent-foreground hover:bg-accent/90"
+              className="rounded-full gap-2"
             >
-              Upgrade
+              <Twitter className="h-4 w-4" />
+              <span className="hidden sm:inline">Share</span>
+            </Button>
+            <Button
+              data-testid="export-pdf-btn"
+              onClick={handleExportPDF}
+              disabled={exporting}
+              size="sm"
+              className="rounded-full bg-accent text-accent-foreground hover:bg-accent/90 gap-2"
+            >
+              {exporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              <span className="hidden sm:inline">Export PDF</span>
             </Button>
           </div>
         </div>
       </header>
 
-      <div className="px-6 md:px-12 py-12 md:py-20">
+      {/* Report Content */}
+      <div ref={reportRef} className="px-6 md:px-12 py-12 md:py-20 bg-background">
         <div className="max-w-5xl mx-auto space-y-16">
           {/* Product Header */}
           <motion.div 
@@ -76,9 +141,12 @@ export default function AuditReport() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4"
           >
-            <p className="font-mono text-sm text-muted-foreground uppercase tracking-widest">
-              Audit Report
-            </p>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
+                <span className="text-accent-foreground font-bold text-sm">W</span>
+              </div>
+              <span className="font-mono text-sm text-muted-foreground">whyAIrecommend Report</span>
+            </div>
             <h1 
               data-testid="report-product-name"
               className="font-heading text-4xl md:text-6xl font-semibold tracking-tight"
@@ -86,6 +154,9 @@ export default function AuditReport() {
               {audit.product_name}
             </h1>
             <p className="text-xl text-muted-foreground">{audit.category}</p>
+            <p className="text-sm text-muted-foreground font-mono">
+              {audit.website_url}
+            </p>
           </motion.div>
 
           {/* Main Result Card */}
@@ -96,7 +167,7 @@ export default function AuditReport() {
             data-testid="recommendation-status-card"
             className={`p-8 md:p-12 rounded-2xl border-2 ${
               audit.is_recommended 
-                ? "border-accent bg-accent/5 glow-sm" 
+                ? "border-accent bg-accent/5" 
                 : "border-border bg-card"
             }`}
           >
@@ -141,15 +212,12 @@ export default function AuditReport() {
               transition={{ delay: 0.2 }}
               className="space-y-6"
             >
-              <div className="flex items-center gap-3">
-                <Users className="w-5 h-5 text-accent" />
-                <h2 
-                  data-testid="competitors-section-title"
-                  className="font-heading text-xl md:text-2xl font-semibold"
-                >
-                  Who AI recommends instead
-                </h2>
-              </div>
+              <h2 
+                data-testid="competitors-section-title"
+                className="font-heading text-xl md:text-2xl font-semibold"
+              >
+                Who AI recommends instead
+              </h2>
               <div className="grid gap-4">
                 {audit.recommended_competitors.map((competitor, index) => (
                   <motion.div 
@@ -158,7 +226,7 @@ export default function AuditReport() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 + index * 0.1 }}
                     data-testid={`competitor-item-${index}`}
-                    className="flex items-start gap-4 p-5 rounded-xl border border-border bg-card hover:border-border/80 transition-colors"
+                    className="flex items-start gap-4 p-5 rounded-xl border border-border bg-card"
                   >
                     <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
                       <span className="font-heading font-semibold text-muted-foreground">
@@ -270,12 +338,58 @@ export default function AuditReport() {
               ))}
             </div>
           </motion.section>
+        </div>
+      </div>
+
+      {/* Share & Action Section (outside reportRef so not in PDF) */}
+      <div className="px-6 md:px-12 pb-12 md:pb-20">
+        <div className="max-w-5xl mx-auto space-y-12">
+          {/* Share Section */}
+          <motion.section 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="p-6 md:p-8 rounded-2xl border border-border bg-card"
+          >
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-2">
+                <h3 className="font-heading text-xl font-semibold">Share your results</h3>
+                <p className="text-muted-foreground">
+                  Let your network know about your AI visibility status
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  data-testid="share-twitter-btn-2"
+                  onClick={handleShareTwitter}
+                  className="rounded-full bg-[#1DA1F2] hover:bg-[#1a8cd8] text-white gap-2"
+                >
+                  <Twitter className="h-4 w-4" />
+                  Share on Twitter
+                </Button>
+                <Button
+                  data-testid="export-pdf-btn-2"
+                  onClick={handleExportPDF}
+                  disabled={exporting}
+                  variant="outline"
+                  className="rounded-full gap-2"
+                >
+                  {exporting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <FileText className="h-4 w-4" />
+                  )}
+                  Download PDF
+                </Button>
+              </div>
+            </div>
+          </motion.section>
 
           {/* Upgrade CTA */}
           <motion.section 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 0.7 }}
             data-testid="upgrade-cta-section"
             className="py-12 border-t border-border/50 space-y-8"
           >
@@ -284,7 +398,7 @@ export default function AuditReport() {
                 Want deeper insights?
               </h2>
               <p className="text-xl text-muted-foreground max-w-xl">
-                Track your AI visibility over time, compare unlimited competitors, and export professional reports.
+                Track your AI visibility over time, compare unlimited competitors, and get priority support.
               </p>
             </div>
 
