@@ -183,6 +183,8 @@ def main():
         tester.test_run_audit,
         tester.test_get_audit,
         tester.test_get_all_audits,
+        tester.test_delete_audit,
+        tester.test_delete_invalid_audit,
         tester.test_invalid_audit_id,
         tester.test_invalid_audit_data
     ]
