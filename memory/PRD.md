@@ -12,29 +12,21 @@
 - ✅ PDF Export for reports
 - ✅ Share to Twitter functionality
 
-### New: Historical Audit Tracking Dashboard
+### Dashboard with Analytics
 - ✅ Stats cards (Total Audits, Recommended, Not Recommended, Success Rate)
-- ✅ Full audit history list with search/filter
-- ✅ View Report button for each audit
+- ✅ **Audit Activity Chart** - Area chart showing audits over last 14 days
+- ✅ **Recommendation Trend Chart** - Line chart with recommended vs not recommended
+- ✅ **Weekly Comparison Chart** - Bar chart comparing this week vs last week
+- ✅ Full audit history list
 - ✅ Delete audit functionality
-- ✅ Competitor tags preview
-- ✅ Time ago formatting
-- ✅ Pro upgrade banner
-- ✅ Dashboard link in main navigation
+- ✅ Responsive charts with tooltips
 
 ## Tech Stack
-- **Frontend**: React, Framer Motion, html2pdf.js, Tailwind CSS
+- **Frontend**: React, Framer Motion, Recharts, html2pdf.js, Tailwind CSS
 - **Backend**: FastAPI, emergentintegrations (OpenAI GPT-5.2)
 - **Database**: MongoDB
-
-## API Endpoints
-- `POST /api/run-audit` - Create new audit
-- `GET /api/audits` - List all audits
-- `GET /api/audit/{id}` - Get specific audit
-- `DELETE /api/audit/{id}` - Delete audit
 
 ## Next Action Items
 1. Implement Stripe payment integration
 2. Build user authentication system
 3. Add email notifications for monthly re-audits
-4. Add trend charts to dashboard
