@@ -36,11 +36,12 @@ export default function AuditPage() {
     }
   };
 
-  const removeCompetitor = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      competitors: prev.competitors.filter((_, i) => i !== index),
-    }));
+  const removeCompetitor = (indexToRemove) => {
+    setFormData((prev) => {
+      const newCompetitors = [...prev.competitors];
+      newCompetitors.splice(indexToRemove, 1);
+      return { ...prev, competitors: newCompetitors };
+    });
   };
 
   const handleKeyDown = (e) => {
@@ -184,15 +185,20 @@ export default function AuditPage() {
                 <div className="flex flex-wrap gap-2 pt-3">
                   {formData.competitors.map((competitor, index) => (
                     <span
-                      key={index}
+                      key={`${competitor}-${index}`}
                       data-testid={`competitor-tag-${index}`}
-                      className="inline-flex items-center gap-1 px-3 py-1 bg-muted rounded-full text-sm font-mono"
+                      className="inline-flex items-center gap-2 px-3 py-1 bg-muted rounded-full text-sm font-mono"
                     >
                       {competitor}
                       <button
                         type="button"
-                        onClick={() => removeCompetitor(index)}
-                        className="hover:text-destructive transition-colors"
+                        data-testid={`remove-competitor-${index}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          removeCompetitor(index);
+                        }}
+                        className="hover:text-destructive transition-colors p-0.5 rounded-full hover:bg-destructive/10"
                       >
                         <X className="h-3 w-3" />
                       </button>

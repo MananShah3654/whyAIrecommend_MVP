@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import axios from "axios";
 import { toast } from "sonner";
 
@@ -91,40 +91,38 @@ export default function ScanProgress() {
           data-testid="scan-steps-container"
           className="font-mono text-sm md:text-base space-y-4"
         >
-          <AnimatePresence mode="wait">
-            {scanSteps.map((step, index) => (
-              <motion.div
-                key={step.id}
-                data-testid={`scan-step-${index}`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ 
-                  opacity: index <= currentStep ? 1 : 0.3,
-                  y: 0 
-                }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
-                className="flex items-center gap-3"
-              >
-                <span className="w-5 h-5 flex items-center justify-center">
-                  {completedSteps.includes(index) ? (
-                    <motion.span
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="text-lime"
-                    >
-                      ✓
-                    </motion.span>
-                  ) : index === currentStep ? (
-                    <span className="w-2 h-2 bg-lime rounded-full animate-pulse-dot" />
-                  ) : (
-                    <span className="w-2 h-2 bg-muted-foreground/30 rounded-full" />
-                  )}
-                </span>
-                <span className={completedSteps.includes(index) ? "text-foreground" : index === currentStep ? "text-foreground" : "text-muted-foreground/50"}>
-                  {step.text}
-                </span>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+          {scanSteps.map((step, index) => (
+            <motion.div
+              key={step.id}
+              data-testid={`scan-step-${index}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ 
+                opacity: index <= currentStep ? 1 : 0.3,
+                y: 0 
+              }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              className="flex items-center gap-3"
+            >
+              <span className="w-5 h-5 flex items-center justify-center">
+                {completedSteps.includes(index) ? (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="text-lime"
+                  >
+                    ✓
+                  </motion.span>
+                ) : index === currentStep ? (
+                  <span className="w-2 h-2 bg-lime rounded-full animate-pulse-dot" />
+                ) : (
+                  <span className="w-2 h-2 bg-muted-foreground/30 rounded-full" />
+                )}
+              </span>
+              <span className={completedSteps.includes(index) ? "text-foreground" : index === currentStep ? "text-foreground" : "text-muted-foreground/50"}>
+                {step.text}
+              </span>
+            </motion.div>
+          ))}
         </div>
 
         <p 
