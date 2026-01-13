@@ -219,6 +219,14 @@ async def get_audit(audit_id: str):
         audit['created_at'] = datetime.fromisoformat(audit['created_at'])
     return audit
 
+@api_router.delete("/audit/{audit_id}")
+async def delete_audit(audit_id: str):
+    """Delete a specific audit by ID"""
+    result = await db.audits.delete_one({"id": audit_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Audit not found")
+    return {"message": "Audit deleted successfully"}
+
 # Include the router in the main app
 app.include_router(api_router)
 

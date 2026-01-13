@@ -5,6 +5,7 @@ import AuditPage from "./pages/AuditPage";
 import ScanProgress from "./pages/ScanProgress";
 import AuditReport from "./pages/AuditReport";
 import PricingPage from "./pages/PricingPage";
+import DashboardPage from "./pages/DashboardPage";
 import { Toaster } from "./components/ui/sonner";
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
           <Route path="/scanning" element={<ScanProgress />} />
           <Route path="/report/:auditId" element={<AuditReport />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
         </Routes>
       </BrowserRouter>
     </div>
