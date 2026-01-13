@@ -118,6 +118,28 @@ class WhyAIRecommendTester:
             404
         )
 
+    def test_delete_audit(self):
+        """Test deleting an audit by ID"""
+        if not self.audit_id:
+            print("❌ Skipping delete audit test - no audit ID available")
+            return False, {}
+            
+        return self.run_test(
+            "Delete Audit by ID",
+            "DELETE",
+            f"audit/{self.audit_id}",
+            200
+        )
+
+    def test_delete_invalid_audit(self):
+        """Test deleting audit with invalid ID"""
+        return self.run_test(
+            "Delete Invalid Audit",
+            "DELETE",
+            "audit/invalid-id-123",
+            404
+        )
+
     def test_invalid_audit_data(self):
         """Test audit with missing required fields"""
         invalid_data = {
