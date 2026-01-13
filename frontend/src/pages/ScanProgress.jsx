@@ -8,17 +8,17 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const scanSteps = [
-  { id: 1, text: "Testing AI recommendation prompts", duration: 2000 },
-  { id: 2, text: "Checking category-level suggestions", duration: 2500 },
-  { id: 3, text: "Comparing against known competitors", duration: 3000 },
-  { id: 4, text: "Analyzing how AI explains results", duration: 2500 },
+  { id: 1, text: "Analyzing product positioning", status: "pending" },
+  { id: 2, text: "Testing AI recommendation prompts", status: "pending" },
+  { id: 3, text: "Comparing against competitors", status: "pending" },
+  { id: 4, text: "Generating insights", status: "pending" },
 ];
 
 export default function ScanProgress() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(0);
-  const [completedSteps, setCompletedSteps] = useState([]);
+  const [steps, setSteps] = useState(scanSteps);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const formData = location.state?.formData;
 
   useEffect(() => {
@@ -27,7 +27,6 @@ export default function ScanProgress() {
       return;
     }
 
-    // Run the actual audit
     const runAudit = async () => {
       try {
         const response = await axios.post(`${API}/run-audit`, formData);
@@ -38,28 +37,31 @@ export default function ScanProgress() {
       }
     };
 
-    // Animate steps while audit runs
-    let stepIndex = 0;
-    const stepInterval = setInterval(() => {
-      if (stepIndex < scanSteps.length) {
-        setCurrentStep(stepIndex);
-        if (stepIndex > 0) {
-          setCompletedSteps((prev) => [...prev, stepIndex - 1]);
+    // Animate steps
+    const animateSteps = () => {
+      let index = 0;
+      const interval = setInterval(() => {
+        if (index < scanSteps.length) {
+          setSteps(prev => prev.map((step, i) => ({
+            ...step,
+            status: i < index ? "complete" : i === index ? "active" : "pending"
+          })));
+          setCurrentIndex(index);
+          index++;
         }
-        stepIndex++;
-      }
-    }, 2000);
+      }, 1500);
+      return interval;
+    };
 
-    // Run audit and navigate when done
+    const stepInterval = animateSteps();
+
     runAudit()
       .then((result) => {
-        // Complete all steps visually
-        setCompletedSteps([0, 1, 2, 3]);
-        setCurrentStep(4);
-        
+        clearInterval(stepInterval);
+        setSteps(prev => prev.map(step => ({ ...step, status: "complete" })));
         setTimeout(() => {
           navigate(`/report/${result.id}`, { state: { auditResult: result } });
-        }, 1000);
+        }, 800);
       })
       .catch((error) => {
         clearInterval(stepInterval);
@@ -73,63 +75,80 @@ export default function ScanProgress() {
   if (!formData) return null;
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 md:px-12 lg:px-24">
-      <div className="max-w-xl w-full space-y-12">
-        <div className="space-y-4">
+    <main className="min-h-screen flex flex-col items-center justify-center px-6 md:px-12">
+      <div className="max-w-lg w-full space-y-12">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="w-20 h-20 mx-auto rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center"
+          >
+            <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+          </motion.div>
           <h1 
             data-testid="scan-title"
-            className="font-heading text-3xl md:text-4xl tracking-tight"
+            className="font-heading text-2xl md:text-3xl font-semibold"
           >
-            Scanning {formData.product_name}
+            Analyzing {formData.product_name}
           </h1>
           <p className="text-muted-foreground">
-            Analyzing AI recommendation behavior...
+            This usually takes about 30 seconds
           </p>
         </div>
 
+        {/* Steps */}
         <div 
           data-testid="scan-steps-container"
-          className="font-mono text-sm md:text-base space-y-4"
+          className="space-y-4"
         >
-          {scanSteps.map((step, index) => (
+          {steps.map((step, index) => (
             <motion.div
               key={step.id}
               data-testid={`scan-step-${index}`}
               initial={{ opacity: 0, y: 10 }}
-              animate={{ 
-                opacity: index <= currentStep ? 1 : 0.3,
-                y: 0 
-              }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-              className="flex items-center gap-3"
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${
+                step.status === "complete" 
+                  ? "border-accent/30 bg-accent/5" 
+                  : step.status === "active"
+                  ? "border-border bg-muted/50"
+                  : "border-transparent bg-transparent"
+              }`}
             >
-              <span className="w-5 h-5 flex items-center justify-center">
-                {completedSteps.includes(index) ? (
-                  <motion.span
+              <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                {step.status === "complete" ? (
+                  <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="text-lime"
+                    className="w-6 h-6 rounded-full bg-accent flex items-center justify-center"
                   >
-                    ✓
-                  </motion.span>
-                ) : index === currentStep ? (
-                  <span className="w-2 h-2 bg-lime rounded-full animate-pulse-dot" />
+                    <svg className="w-4 h-4 text-accent-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </motion.div>
+                ) : step.status === "active" ? (
+                  <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <span className="w-2 h-2 bg-muted-foreground/30 rounded-full" />
+                  <div className="w-6 h-6 rounded-full border border-border" />
                 )}
-              </span>
-              <span className={completedSteps.includes(index) ? "text-foreground" : index === currentStep ? "text-foreground" : "text-muted-foreground/50"}>
+              </div>
+              <span className={`font-medium ${
+                step.status === "pending" ? "text-muted-foreground" : "text-foreground"
+              }`}>
                 {step.text}
               </span>
             </motion.div>
           ))}
         </div>
 
+        {/* Footer */}
         <p 
           data-testid="scan-footer-note"
-          className="text-xs text-muted-foreground/70 font-mono"
+          className="text-center text-sm text-muted-foreground/60 font-mono"
         >
-          We use controlled prompts to simulate real buyer questions.
+          Using controlled prompts to simulate buyer questions
         </p>
       </div>
     </main>
