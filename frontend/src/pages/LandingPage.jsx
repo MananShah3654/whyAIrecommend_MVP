@@ -33,6 +33,13 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-4">
             <button 
+              onClick={() => navigate("/dashboard")}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              data-testid="nav-dashboard"
+            >
+              Dashboard
+            </button>
+            <button 
               onClick={() => navigate("/pricing")}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               data-testid="nav-pricing"
