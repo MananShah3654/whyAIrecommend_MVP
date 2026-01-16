@@ -329,6 +329,8 @@ Return ONLY valid JSON, nothing else."""
             failure_criteria=analysis.get("failure_criteria", ""),
             next_steps_if_no_improvement=analysis.get("next_steps_if_no_improvement", ""),
             impact_forecasts=impact_forecasts,
+            execution_confidence=analysis.get("execution_confidence", 70),
+            confidence_factors=analysis.get("confidence_factors", [])[:5],
             improvements=[a.get("title", "") for a in analysis.get("action_plan", [])[:3]]
         )
         
