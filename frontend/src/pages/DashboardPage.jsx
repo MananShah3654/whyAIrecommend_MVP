@@ -509,7 +509,8 @@ export default function DashboardPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                   data-testid={`audit-row-${index}`}
-                  className="group p-5 rounded-xl border border-border bg-card hover:border-accent/30 transition-all"
+                  onClick={() => navigate(`/report/${audit.id}`)}
+                  className="group p-5 rounded-xl border border-border bg-card hover:border-accent/30 transition-all cursor-pointer"
                 >
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     {/* Left: Product Info */}
