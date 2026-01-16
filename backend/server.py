@@ -117,11 +117,10 @@ async def run_ai_audit(request: AuditRequest) -> AuditResult:
     if not api_key:
         raise HTTPException(status_code=500, detail="API key not configured")
     
-    # Create the prompt
     competitors_str = ", ".join(request.competitors) if request.competitors else "unknown competitors"
     
-    system_message = """You are an AI analyst evaluating how AI assistants like ChatGPT recommend software products. 
-    Analyze product positioning and provide structured feedback.
+    system_message = """You are an expert AI recommendation analyst. You analyze how AI assistants (ChatGPT, Gemini, Perplexity) recommend software products.
+    Your analysis must be specific, actionable, and tied to AI explainability signals.
     Always respond with valid JSON only, no markdown or explanations."""
     
     user_prompt = f"""Analyze how AI tools would recommend products in this category:
@@ -131,35 +130,94 @@ Website: {request.website_url}
 Category: {request.category}
 Known Competitors: {competitors_str}
 
-Simulate how an AI assistant would respond to a user asking: "What's the best {request.category} tool?"
+Simulate how ChatGPT, Gemini, and Perplexity would respond to: "What's the best {request.category} tool?"
 
-Provide your analysis as JSON with this exact structure:
+Provide your analysis as JSON with this EXACT structure:
 {{
-    "is_recommended": boolean (would this product be mentioned by AI?),
+    "is_recommended": boolean,
     "recommendation_position": "top" | "middle" | "mentioned" | null,
+    
+    "model_analyses": [
+        {{
+            "model_name": "ChatGPT",
+            "is_recommended": boolean,
+            "recommendation_position": "top" | "middle" | "mentioned" | null,
+            "explainability_score": 0-100,
+            "dominant_signals": ["signal1", "signal2", "signal3"],
+            "why_recommended_or_not": "specific reason"
+        }},
+        {{
+            "model_name": "Gemini",
+            "is_recommended": boolean,
+            "recommendation_position": "top" | "middle" | "mentioned" | null,
+            "explainability_score": 0-100,
+            "dominant_signals": ["signal1", "signal2", "signal3"],
+            "why_recommended_or_not": "specific reason"
+        }},
+        {{
+            "model_name": "Perplexity",
+            "is_recommended": boolean,
+            "recommendation_position": "top" | "middle" | "mentioned" | null,
+            "explainability_score": 0-100,
+            "dominant_signals": ["signal1", "signal2", "signal3"],
+            "why_recommended_or_not": "specific reason"
+        }}
+    ],
+    
     "recommended_competitors": [
         {{"name": "CompetitorName", "reason": "Why AI recommends them"}}
     ],
-    "why_others_recommended": [
-        "Reason 1 why competitors get recommended",
-        "Reason 2 why competitors get recommended"
+    
+    "why_others_recommended": ["Reason 1", "Reason 2", "Reason 3"],
+    "why_product_skipped": ["Reason 1", "Reason 2", "Reason 3"],
+    
+    "action_plan": [
+        {{
+            "title": "Clear action title",
+            "what_to_do": "Specific change to make",
+            "why_it_matters": "Why this affects AI recommendations",
+            "where_ai_picks_signal": "Where AI will detect this signal",
+            "expected_impact": "Expected result after 7 days",
+            "category": "Category Clarification | Language Simplification | Comparison Presence | Single-Paragraph Product Summary | Authority / Use-Case Signal"
+        }}
     ],
-    "why_product_skipped": [
-        "Reason 1 why this product might be skipped",
-        "Reason 2 why this product might be skipped"
-    ],
-    "improvements": [
-        "Specific improvement 1",
-        "Specific improvement 2",
-        "Specific improvement 3"
+    
+    "expected_behavior_after_7_days": "Prediction of how AI responses will change (probabilistic, not guaranteed)",
+    
+    "validation_signals": ["Signal 1 to check", "Signal 2 to check"],
+    "success_criteria": "What success looks like in a re-scan",
+    "failure_criteria": "What failure looks like",
+    "next_steps_if_no_improvement": "What to do if no improvement",
+    
+    "impact_forecasts": [
+        {{
+            "model_name": "ChatGPT",
+            "signal_improves": "What signal will improve",
+            "likely_changes": "What will likely change",
+            "will_not_change": "What won't change yet"
+        }},
+        {{
+            "model_name": "Gemini",
+            "signal_improves": "What signal will improve",
+            "likely_changes": "What will likely change",
+            "will_not_change": "What won't change yet"
+        }},
+        {{
+            "model_name": "Perplexity",
+            "signal_improves": "What signal will improve",
+            "likely_changes": "What will likely change",
+            "will_not_change": "What won't change yet"
+        }}
     ]
 }}
 
-Base your analysis on:
-- Category clarity and positioning
-- Comparison-style mentions and differentiators
-- Messaging simplicity
-- Brand recognition signals
+IMPORTANT RULES:
+- Provide EXACTLY 5 actions in action_plan
+- Actions must be executable within 7 days
+- Actions must be from these categories ONLY: Category Clarification, Language Simplification, Comparison Presence, Single-Paragraph Product Summary, Authority / Use-Case Signal
+- Never promise ranking improvements
+- Frame improvements as "increased likelihood" not guarantees
+- Each model analysis must be independent
 
 Return ONLY valid JSON, nothing else."""
 
@@ -174,14 +232,46 @@ Return ONLY valid JSON, nothing else."""
     try:
         response = await chat.send_message(user_message)
         
-        # Parse the JSON response
         json_match = re.search(r'\{[\s\S]*\}', response)
         if json_match:
             analysis = json.loads(json_match.group())
         else:
             analysis = json.loads(response)
         
-        # Build the audit result
+        # Build model analyses
+        model_analyses = []
+        for ma in analysis.get("model_analyses", []):
+            model_analyses.append(ModelAnalysis(
+                model_name=ma.get("model_name", "Unknown"),
+                is_recommended=ma.get("is_recommended", False),
+                recommendation_position=ma.get("recommendation_position"),
+                explainability_score=ma.get("explainability_score", 0),
+                dominant_signals=ma.get("dominant_signals", [])[:5],
+                why_recommended_or_not=ma.get("why_recommended_or_not", "")
+            ))
+        
+        # Build action plan
+        action_plan = []
+        for action in analysis.get("action_plan", [])[:5]:
+            action_plan.append(ActionItem(
+                title=action.get("title", ""),
+                what_to_do=action.get("what_to_do", ""),
+                why_it_matters=action.get("why_it_matters", ""),
+                where_ai_picks_signal=action.get("where_ai_picks_signal", ""),
+                expected_impact=action.get("expected_impact", ""),
+                category=action.get("category", "")
+            ))
+        
+        # Build impact forecasts
+        impact_forecasts = []
+        for forecast in analysis.get("impact_forecasts", []):
+            impact_forecasts.append(ImpactForecast(
+                model_name=forecast.get("model_name", ""),
+                signal_improves=forecast.get("signal_improves", ""),
+                likely_changes=forecast.get("likely_changes", ""),
+                will_not_change=forecast.get("will_not_change", "")
+            ))
+        
         result = AuditResult(
             product_name=request.product_name,
             website_url=request.website_url,
@@ -189,20 +279,27 @@ Return ONLY valid JSON, nothing else."""
             competitors_input=request.competitors or [],
             is_recommended=analysis.get("is_recommended", False),
             recommendation_position=analysis.get("recommendation_position"),
+            model_analyses=model_analyses,
             recommended_competitors=[
                 CompetitorAnalysis(name=c["name"], reason=c["reason"])
                 for c in analysis.get("recommended_competitors", [])[:5]
             ],
             why_others_recommended=analysis.get("why_others_recommended", [])[:4],
             why_product_skipped=analysis.get("why_product_skipped", [])[:4],
-            improvements=analysis.get("improvements", [])[:3]
+            action_plan=action_plan,
+            expected_behavior_after_7_days=analysis.get("expected_behavior_after_7_days", ""),
+            validation_signals=analysis.get("validation_signals", [])[:5],
+            success_criteria=analysis.get("success_criteria", ""),
+            failure_criteria=analysis.get("failure_criteria", ""),
+            next_steps_if_no_improvement=analysis.get("next_steps_if_no_improvement", ""),
+            impact_forecasts=impact_forecasts,
+            improvements=[a.get("title", "") for a in analysis.get("action_plan", [])[:3]]
         )
         
         return result
         
     except json.JSONDecodeError as e:
         logging.error(f"Failed to parse AI response: {e}")
-        # Return a default analysis if parsing fails
         return AuditResult(
             product_name=request.product_name,
             website_url=request.website_url,
@@ -210,11 +307,19 @@ Return ONLY valid JSON, nothing else."""
             competitors_input=request.competitors or [],
             is_recommended=False,
             recommendation_position=None,
+            model_analyses=[],
             recommended_competitors=[
                 CompetitorAnalysis(name="Analysis Error", reason="Could not parse AI response")
             ],
             why_others_recommended=["AI response parsing failed"],
             why_product_skipped=["Could not complete analysis"],
+            action_plan=[],
+            expected_behavior_after_7_days="",
+            validation_signals=[],
+            success_criteria="",
+            failure_criteria="",
+            next_steps_if_no_improvement="",
+            impact_forecasts=[],
             improvements=["Try running the audit again"]
         )
     except Exception as e:
