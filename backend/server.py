@@ -287,7 +287,15 @@ Return ONLY valid JSON, nothing else."""
                 why_it_matters=action.get("why_it_matters", ""),
                 where_ai_picks_signal=action.get("where_ai_picks_signal", ""),
                 expected_impact=action.get("expected_impact", ""),
-                category=action.get("category", "")
+                category=action.get("category", ""),
+                owner=action.get("owner", "Product"),
+                location=action.get("location", "Homepage"),
+                effort=action.get("effort", "30-45 mins"),
+                suggested_copy=action.get("suggested_copy", ""),
+                before_explanation=action.get("before_explanation", ""),
+                after_explanation=action.get("after_explanation", ""),
+                improves_models=action.get("improves_models", ["ChatGPT", "Gemini", "Perplexity"]),
+                day_range=action.get("day_range", "Day 1-2")
             ))
         
         # Build impact forecasts
