@@ -6,27 +6,43 @@
 - ✅ Premium landing page (antimetal.com-inspired)
 - ✅ Step-by-step conversational audit form
 - ✅ Animated scan progress page
-- ✅ Comprehensive audit report
 - ✅ Pricing page with 3 tiers (Free, Pro $49/mo, Enterprise)
-- ✅ OpenAI GPT-5.2 integration via Emergent LLM key
 - ✅ PDF Export for reports
 - ✅ Share to Twitter functionality
+- ✅ Dashboard with trend charts
 
-### Dashboard with Analytics
-- ✅ Stats cards (Total Audits, Recommended, Not Recommended, Success Rate)
-- ✅ **Audit Activity Chart** - Area chart showing audits over last 14 days
-- ✅ **Recommendation Trend Chart** - Line chart with recommended vs not recommended
-- ✅ **Weekly Comparison Chart** - Bar chart comparing this week vs last week
-- ✅ Full audit history list
-- ✅ Delete audit functionality
-- ✅ Responsive charts with tooltips
+### Enhanced Audit Report System
+- ✅ **Model-Specific Analysis**: Separate analysis for ChatGPT, Gemini, Perplexity
+  - Explainability Score (0-100) with color-coded progress bars
+  - Dominant signals per model
+  - Per-model recommendation status
+- ✅ **7-Day Actionable Improvement Plan**: Exactly 5 actions
+  - Categories: Category Clarification, Language Simplification, Comparison Presence, Single-Paragraph Product Summary, Authority / Use-Case Signal
+  - Each action includes: title, what_to_do, why_it_matters, where_ai_picks_signal, expected_impact
+- ✅ **Expected AI Behavior After 7 Days**: Probabilistic predictions
+- ✅ **Per-Model Impact Forecast**: What will/won't change for each AI model
+- ✅ **Validation System**: Signals to check, success/failure criteria, next steps
 
 ## Tech Stack
 - **Frontend**: React, Framer Motion, Recharts, html2pdf.js, Tailwind CSS
 - **Backend**: FastAPI, emergentintegrations (OpenAI GPT-5.2)
 - **Database**: MongoDB
 
+## API Response Structure
+```json
+{
+  "model_analyses": [...],
+  "action_plan": [...],
+  "expected_behavior_after_7_days": "...",
+  "impact_forecasts": [...],
+  "validation_signals": [...],
+  "success_criteria": "...",
+  "failure_criteria": "...",
+  "next_steps_if_no_improvement": "..."
+}
+```
+
 ## Next Action Items
 1. Implement Stripe payment integration
-2. Build user authentication system
+2. Build user authentication system  
 3. Add email notifications for monthly re-audits
