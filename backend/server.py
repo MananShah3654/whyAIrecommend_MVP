@@ -112,6 +112,10 @@ class AuditResult(BaseModel):
     # Per-model impact forecast
     impact_forecasts: List[ImpactForecast] = []
     
+    # Execution confidence score (0-100)
+    execution_confidence: int = 0
+    confidence_factors: List[str] = []
+    
     # Legacy fields
     improvements: List[str] = []
     
