@@ -61,7 +61,7 @@ class WhyAIRecommendTester:
         return self.run_test("Root API", "GET", "", 200)
 
     def test_run_audit(self):
-        """Test running an AI audit"""
+        """Test running an AI audit with enhanced features validation"""
         test_data = {
             "product_name": "TestProduct",
             "website_url": "https://testproduct.com",
@@ -82,17 +82,83 @@ class WhyAIRecommendTester:
             self.audit_id = response.get('id')
             print(f"   Audit ID: {self.audit_id}")
             
-            # Validate response structure
+            # Validate basic response structure
             required_fields = ['id', 'product_name', 'is_recommended', 'created_at']
             missing_fields = [field for field in required_fields if field not in response]
             if missing_fields:
-                print(f"   ⚠️  Missing fields: {missing_fields}")
+                print(f"   ⚠️  Missing basic fields: {missing_fields}")
                 return False, response
+            
+            # Validate enhanced audit features
+            self.validate_enhanced_features(response)
             
             print(f"   Is Recommended: {response.get('is_recommended')}")
             print(f"   Competitors Found: {len(response.get('recommended_competitors', []))}")
             
         return success, response
+
+    def validate_enhanced_features(self, response):
+        """Validate the enhanced audit report features"""
+        print("\n   🔍 Validating Enhanced Features:")
+        
+        # 1. Model-Specific Analysis
+        model_analyses = response.get('model_analyses', [])
+        print(f"   📊 Model Analyses: {len(model_analyses)} models")
+        
+        expected_models = ['ChatGPT', 'Gemini', 'Perplexity']
+        found_models = [m.get('model_name') for m in model_analyses]
+        
+        for model in expected_models:
+            if model in found_models:
+                model_data = next(m for m in model_analyses if m.get('model_name') == model)
+                score = model_data.get('explainability_score', 0)
+                print(f"   ✅ {model}: Score {score}/100, Signals: {len(model_data.get('dominant_signals', []))}")
+                
+                # Validate explainability score range
+                if not (0 <= score <= 100):
+                    print(f"   ⚠️  {model} explainability score out of range: {score}")
+            else:
+                print(f"   ❌ Missing model: {model}")
+        
+        # 2. Action Plan (should be exactly 5 items)
+        action_plan = response.get('action_plan', [])
+        print(f"   📋 Action Plan: {len(action_plan)} items (expected: 5)")
+        
+        if len(action_plan) != 5:
+            print(f"   ⚠️  Action plan should have exactly 5 items, found {len(action_plan)}")
+        
+        for i, action in enumerate(action_plan[:3]):  # Check first 3 for structure
+            required_action_fields = ['title', 'what_to_do', 'why_it_matters', 'where_ai_picks_signal', 'expected_impact', 'category']
+            missing_action_fields = [field for field in required_action_fields if not action.get(field)]
+            if missing_action_fields:
+                print(f"   ⚠️  Action {i+1} missing fields: {missing_action_fields}")
+            else:
+                print(f"   ✅ Action {i+1}: {action.get('title')[:30]}...")
+        
+        # 3. Impact Forecasts (should be 3 models)
+        impact_forecasts = response.get('impact_forecasts', [])
+        print(f"   📈 Impact Forecasts: {len(impact_forecasts)} models (expected: 3)")
+        
+        if len(impact_forecasts) != 3:
+            print(f"   ⚠️  Impact forecasts should have 3 models, found {len(impact_forecasts)}")
+        
+        # 4. Expected Behavior After 7 Days
+        expected_behavior = response.get('expected_behavior_after_7_days', '')
+        if expected_behavior:
+            print(f"   ✅ Expected Behavior: {len(expected_behavior)} chars")
+        else:
+            print(f"   ⚠️  Missing expected behavior after 7 days")
+        
+        # 5. Validation Criteria
+        validation_fields = ['validation_signals', 'success_criteria', 'failure_criteria']
+        for field in validation_fields:
+            value = response.get(field)
+            if value:
+                print(f"   ✅ {field}: Present")
+            else:
+                print(f"   ⚠️  Missing {field}")
+        
+        print("   🔍 Enhanced features validation complete")
 
     def test_get_audit(self):
         """Test getting a specific audit by ID"""
