@@ -50,6 +50,15 @@ class ActionItem(BaseModel):
     where_ai_picks_signal: str
     expected_impact: str
     category: str
+    # New fields for enhanced UX
+    owner: str = ""  # Product / Marketing / Engineering
+    location: str = ""  # Where to implement
+    effort: str = ""  # Time estimate
+    suggested_copy: str = ""  # Exact copy to paste
+    before_explanation: str = ""  # How AI explains now
+    after_explanation: str = ""  # How AI will explain after
+    improves_models: List[str] = []  # Which models this improves
+    day_range: str = ""  # Which day(s) in the 7-day sprint
 
 class ModelAnalysis(BaseModel):
     model_name: str
