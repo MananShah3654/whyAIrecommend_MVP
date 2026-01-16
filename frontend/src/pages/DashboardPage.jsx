@@ -558,7 +558,7 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Right: Actions */}
-                    <div className="flex items-center gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                       <Button
                         data-testid={`view-audit-${index}`}
                         onClick={() => navigate(`/report/${audit.id}`)}
