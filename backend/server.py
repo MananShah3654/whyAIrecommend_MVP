@@ -43,6 +43,28 @@ class ExplainabilityItem(BaseModel):
     text: str
     positive: bool
 
+class ActionItem(BaseModel):
+    title: str
+    what_to_do: str
+    why_it_matters: str
+    where_ai_picks_signal: str
+    expected_impact: str
+    category: str
+
+class ModelAnalysis(BaseModel):
+    model_name: str
+    is_recommended: bool
+    recommendation_position: Optional[str] = None
+    explainability_score: int  # 0-100
+    dominant_signals: List[str]
+    why_recommended_or_not: str
+
+class ImpactForecast(BaseModel):
+    model_name: str
+    signal_improves: str
+    likely_changes: str
+    will_not_change: str
+
 class AuditResult(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
@@ -51,12 +73,39 @@ class AuditResult(BaseModel):
     website_url: str
     category: str
     competitors_input: List[str]
+    
+    # Overall status
     is_recommended: bool
     recommendation_position: Optional[str] = None
+    
+    # Model-specific analysis
+    model_analyses: List[ModelAnalysis] = []
+    
+    # Competitors
     recommended_competitors: List[CompetitorAnalysis]
+    
+    # Explainability
     why_others_recommended: List[str]
     why_product_skipped: List[str]
-    improvements: List[str]
+    
+    # 5-step action plan
+    action_plan: List[ActionItem] = []
+    
+    # 7-day impact simulation
+    expected_behavior_after_7_days: str = ""
+    
+    # Re-scan validation
+    validation_signals: List[str] = []
+    success_criteria: str = ""
+    failure_criteria: str = ""
+    next_steps_if_no_improvement: str = ""
+    
+    # Per-model impact forecast
+    impact_forecasts: List[ImpactForecast] = []
+    
+    # Legacy fields
+    improvements: List[str] = []
+    
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 # ==================== AI AUDIT LOGIC ====================
