@@ -191,7 +191,15 @@ Provide your analysis as JSON with this EXACT structure:
             "why_it_matters": "Why this affects AI recommendations",
             "where_ai_picks_signal": "Where AI will detect this signal",
             "expected_impact": "Expected result after 7 days",
-            "category": "Category Clarification | Language Simplification | Comparison Presence | Single-Paragraph Product Summary | Authority / Use-Case Signal"
+            "category": "Category Clarification | Language Simplification | Comparison Presence | Single-Paragraph Product Summary | Authority / Use-Case Signal",
+            "owner": "Product | Marketing | Engineering | Content",
+            "location": "Homepage | About page | Pricing page | Blog | Documentation",
+            "effort": "15-30 mins | 30-45 mins | 1-2 hours | 2-4 hours",
+            "suggested_copy": "Exact copy text the user can paste. Write a clear, AI-optimized paragraph for {request.product_name} that defines its category and value proposition.",
+            "before_explanation": "How AI currently explains products in this category (generic)",
+            "after_explanation": "How AI will likely explain {request.product_name} after implementing this action",
+            "improves_models": ["ChatGPT", "Gemini", "Perplexity"],
+            "day_range": "Day 1-2 | Day 3 | Day 4 | Day 5 | Day 6-7"
         }}
     ],
     
@@ -221,16 +229,23 @@ Provide your analysis as JSON with this EXACT structure:
             "likely_changes": "What will likely change",
             "will_not_change": "What won't change yet"
         }}
-    ]
+    ],
+    
+    "execution_confidence": 0-100,
+    "confidence_factors": ["Factor 1 affecting confidence", "Factor 2", "Factor 3"]
 }}
 
 IMPORTANT RULES:
 - Provide EXACTLY 5 actions in action_plan
 - Actions must be executable within 7 days
 - Actions must be from these categories ONLY: Category Clarification, Language Simplification, Comparison Presence, Single-Paragraph Product Summary, Authority / Use-Case Signal
+- For each action, provide realistic suggested_copy that the user can actually paste
+- For each action, provide before/after AI explanation examples
+- Assign day_range: Day 1-2 for Category, Day 3 for Summary, Day 4 for Comparison, Day 5 for Language, Day 6-7 for Authority
 - Never promise ranking improvements
 - Frame improvements as "increased likelihood" not guarantees
 - Each model analysis must be independent
+- execution_confidence should reflect how actionable and impactful the plan is
 
 Return ONLY valid JSON, nothing else."""
 
