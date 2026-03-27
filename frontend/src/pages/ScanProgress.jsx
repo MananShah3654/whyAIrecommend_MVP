@@ -29,7 +29,9 @@ export default function ScanProgress() {
 
     const runAudit = async () => {
       try {
-        const response = await axios.post(`${API}/run-audit`, formData);
+        const response = await axios.post(`${API}/run-audit`, formData, {
+          timeout: 180000 // 3 minutes timeout for LLM processing
+        });
         return response.data;
       } catch (error) {
         console.error("Audit failed:", error);
