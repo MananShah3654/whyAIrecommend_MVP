@@ -41,7 +41,7 @@ export default function ScanProgress() {
       }
     };
 
-    // Animate steps
+    // Animate steps - slower to match actual API time
     const animateSteps = () => {
       let index = 0;
       const interval = setInterval(() => {
@@ -53,7 +53,7 @@ export default function ScanProgress() {
           setCurrentIndex(index);
           index++;
         }
-      }, 1500);
+      }, 12000); // 12 seconds per step = ~72 seconds total
       return interval;
     };
 
