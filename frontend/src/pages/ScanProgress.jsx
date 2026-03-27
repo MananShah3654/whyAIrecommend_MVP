@@ -9,9 +9,11 @@ const API = `${BACKEND_URL}/api`;
 
 const scanSteps = [
   { id: 1, text: "Analyzing product positioning", status: "pending" },
-  { id: 2, text: "Testing AI recommendation prompts", status: "pending" },
-  { id: 3, text: "Comparing against competitors", status: "pending" },
-  { id: 4, text: "Generating insights", status: "pending" },
+  { id: 2, text: "Testing ChatGPT recommendations", status: "pending" },
+  { id: 3, text: "Testing Gemini recommendations", status: "pending" },
+  { id: 4, text: "Testing Perplexity recommendations", status: "pending" },
+  { id: 5, text: "Comparing against competitors", status: "pending" },
+  { id: 6, text: "Generating action plan", status: "pending" },
 ];
 
 export default function ScanProgress() {
