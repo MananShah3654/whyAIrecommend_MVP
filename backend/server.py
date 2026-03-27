@@ -254,7 +254,7 @@ Return ONLY valid JSON, nothing else."""
         api_key=api_key,
         session_id=f"audit-{uuid.uuid4()}",
         system_message=system_message
-    ).with_model("openai", "gpt-5.2")
+    ).with_model("openai", "gpt-4o")
     
     user_message = UserMessage(text=user_prompt)
     
