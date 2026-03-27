@@ -383,11 +383,35 @@ async def create_audit(request: AuditRequest):
     if not request.category or not request.category.strip():
         raise HTTPException(status_code=422, detail="Category is required")
     
-    # Run the AI audit
-    result = await run_ai_audit(request)
+    # Run the AI audit with retry logic
+    max_retries = 3
+    last_error = None
     
-    # Store in MongoDB
-    doc = result.model_dump()
+    for attempt in range(max_retries):
+        try:
+            result = await run_ai_audit(request)
+            
+            # Store in MongoDB
+            doc = result.model_dump()
+            doc['created_at'] = doc['created_at'].isoformat()
+            await db.audits.insert_one(doc)
+            
+            return result
+        except HTTPException as e:
+            last_error = e
+            if attempt < max_retries - 1:
+                logging.warning(f"Audit attempt {attempt + 1} failed, retrying in 5 seconds...")
+                await asyncio.sleep(5)
+            else:
+                raise
+        except Exception as e:
+            last_error = e
+            if attempt < max_retries - 1:
+                logging.warning(f"Audit attempt {attempt + 1} failed with {str(e)}, retrying in 5 seconds...")
+                await asyncio.sleep(5)
+            else:
+                logging.error(f"All {max_retries} audit attempts failed")
+                raise HTTPException(status_code=500, detail=f"Audit failed after {max_retries} attempts: {str(last_error)}")
     doc['created_at'] = doc['created_at'].isoformat()
     await db.audits.insert_one(doc)
     
