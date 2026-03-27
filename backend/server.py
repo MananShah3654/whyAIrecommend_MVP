@@ -412,10 +412,6 @@ async def create_audit(request: AuditRequest):
             else:
                 logging.error(f"All {max_retries} audit attempts failed")
                 raise HTTPException(status_code=500, detail=f"Audit failed after {max_retries} attempts: {str(last_error)}")
-    doc['created_at'] = doc['created_at'].isoformat()
-    await db.audits.insert_one(doc)
-    
-    return result
 
 @api_router.get("/audits", response_model=List[AuditResult])
 async def get_audits():
