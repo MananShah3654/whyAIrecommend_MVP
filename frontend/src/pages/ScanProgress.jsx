@@ -95,7 +95,7 @@ export default function ScanProgress() {
             Analyzing {formData.product_name}
           </h1>
           <p className="text-muted-foreground">
-            This usually takes about 30 seconds
+            This usually takes 60-90 seconds
           </p>
         </div>
 
